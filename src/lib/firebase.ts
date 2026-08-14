@@ -14,7 +14,9 @@ import {
   orderBy, 
   limit, 
   serverTimestamp,
-  updateDoc
+  updateDoc,
+  deleteDoc,
+  writeBatch
 } from 'firebase/firestore';
 import firebaseConfigJson from '../../firebase-applet-config.json';
 
@@ -67,5 +69,7 @@ export {
   orderBy,
   limit,
   serverTimestamp,
-  updateDoc
+  updateDoc,
+  deleteDoc,
+  writeBatch
 };

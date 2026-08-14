@@ -3,12 +3,15 @@ import {
   doc, 
   setDoc, 
   getDoc, 
+  getDocs,
   onSnapshot, 
   collection, 
   query, 
   orderBy, 
   limit, 
-  updateDoc 
+  updateDoc,
+  deleteDoc,
+  writeBatch
 } from '../lib/firebase';
 import { 
   DesfibramentoSector, 
@@ -422,6 +425,20 @@ export async function resetDailyDataToCleanState(): Promise<void> {
   await setDoc(DESCASQUE_DOC, getCleanDayDescasque());
   await setDoc(RALO_DOC, getCleanDayRalo());
   await setDoc(STAFF_DOC, getCleanDayStaff());
+
+  // Clear all occurrences from the live occurrences collection
+  try {
+    const occurrencesSnap = await getDocs(OCCURRENCES_COLLECTION);
+    if (!occurrencesSnap.empty) {
+      const batch = writeBatch(db);
+      occurrencesSnap.forEach((docSnap) => {
+        batch.delete(docSnap.ref);
+      });
+      await batch.commit();
+    }
+  } catch (error) {
+    console.error('Error clearing occurrences on reset day:', error);
+  }
 }
 
 /**

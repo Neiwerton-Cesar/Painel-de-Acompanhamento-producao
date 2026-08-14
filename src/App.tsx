@@ -19,6 +19,7 @@ import { SectorCards } from './components/SectorCards';
 import { StaffCard } from './components/StaffCard';
 import { OccurrencesMural } from './components/OccurrencesMural';
 import { NewRecordModal } from './components/NewRecordModal';
+import { ResetDayModal } from './components/ResetDayModal';
 import { 
   DesfibramentoSector, 
   DescasqueSector, 
@@ -59,6 +60,7 @@ export default function App() {
 
   const [activeShift, setActiveShift] = useState<ShiftType>('Turno 2 (14:00 - 22:00)');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isResetDayModalOpen, setIsResetDayModalOpen] = useState<boolean>(false);
   const [modalInitialSector, setModalInitialSector] = useState<SectorType>('Desfibramento');
   const [toastMessage, setToastMessage] = useState<{ title: string; desc: string; type: 'success' | 'info' } | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -169,15 +171,20 @@ export default function App() {
     }
   };
 
-  // Reset to clean daily state in Firestore
-  const handleResetDay = async () => {
-    if (window.confirm('Deseja zerar os contadores e iniciar um novo dia de produção limpo?')) {
-      try {
-        await resetDailyDataToCleanState();
-        showToast('Dia Reiniciado', 'Os contadores diários foram zerados com sucesso.', 'success');
-      } catch (error) {
-        console.error('Error resetting day:', error);
-      }
+  // Open Password-Protected Reset Day Modal
+  const handleResetDay = () => {
+    setIsResetDayModalOpen(true);
+  };
+
+  // Confirmed Reset after entering password PCP123
+  const handleConfirmResetDay = async () => {
+    try {
+      setOccurrences([]);
+      await resetDailyDataToCleanState();
+      showToast('Dia Reiniciado', 'Contadores e mural de ocorrências zerados com sucesso.', 'success');
+    } catch (error) {
+      console.error('Error resetting day:', error);
+      showToast('Erro ao zerar', 'Não foi possível zerar os dados na nuvem.', 'info');
     }
   };
 
@@ -289,6 +296,13 @@ export default function App() {
         currentRalo={ralo}
         currentStaff={staff}
         activeShift={activeShift}
+      />
+
+      {/* 3.1 MODAL FOR PASSWORD-PROTECTED RESET DAY */}
+      <ResetDayModal
+        isOpen={isResetDayModalOpen}
+        onClose={() => setIsResetDayModalOpen(false)}
+        onConfirm={handleConfirmResetDay}
       />
 
       {/* 4. FLOATING TOAST NOTIFICATION */}
