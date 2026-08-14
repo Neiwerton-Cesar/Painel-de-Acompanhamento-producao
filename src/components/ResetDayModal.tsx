@@ -117,7 +117,7 @@ export const ResetDayModal: React.FC<ResetDayModalProps> = ({
                   setPassword(e.target.value);
                   if (errorMessage) setErrorMessage(null);
                 }}
-                placeholder="Digite a senha (PCP123)..."
+                placeholder="Digite a senha..."
                 className={`w-full pl-9 pr-10 py-2.5 bg-slate-950 border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none transition-all ${
                   errorMessage
                     ? 'border-rose-500/80 ring-2 ring-rose-500/20 focus:border-rose-500'
