@@ -1,6 +1,17 @@
 export type SectorType = 'Desfibramento' | 'Descasque' | 'Ralo' | 'Outros';
 
-export type CoconutVariety = 'Anão Verde' | 'Gigante do Brasil' | 'Híbrido' | 'Misto Industrial' | 'Outro';
+export const COCONUT_VARIETIES = [
+  'PB-111',
+  'PB-113',
+  'PB-121',
+  'PB-123',
+  'PB-132',
+  'PB-141',
+  'AVeBr',
+  'AVB',
+] as const;
+
+export type CoconutVariety = typeof COCONUT_VARIETIES[number] | string;
 
 export type ScaleStatus = 'Operacional' | 'Calibração Pendente' | 'Em Manutenção' | 'Inoperante';
 
@@ -10,6 +21,7 @@ export type StopStatus =
   | 'Parada Elétrica' 
   | 'Troca de Facas / Limpeza' 
   | 'Falta de Insumo'
+  | 'Falta de Insumo/coco'
   | 'Aguardando Operação';
 
 export type RaloQuality = 'Normal' | 'Quebradiço' | 'Queimado' | 'Misto';
@@ -21,6 +33,7 @@ export type ShiftType = 'Turno 1 (06:00 - 14:00)' | 'Turno 2 (14:00 - 22:00)' | 
 export type OccurrenceType = 
   | 'Parada Mecânica' 
   | 'Parada Elétrica' 
+  | 'Falta de Insumo/coco'
   | 'Alerta de Qualidade' 
   | 'Status da Balança' 
   | 'Ajuste Operacional' 
@@ -31,22 +44,27 @@ export interface DesfibramentoSector {
   carretasEmProcesso: number;
   carretasProcessadasDia: number;
   metaCarretasDia: number;
-  variedadeCoco: CoconutVariety;
-  estoqueInteiro: number; // e.g. em cocos ou milheiros
+  totalCocosProcessados?: number; // Total de cocos processados em unidades
+  variedadeCoco: string; // E.g. "PB-111" or "PB-111, PB-121"
+  estoqueInteiro: number; // em unidades
   estoqueFurado: number;
   unidadeEstoque: 'milheiros' | 'unidades' | 'toneladas';
   statusGeral: 'normal' | 'alerta' | 'parado';
   ultimaAtualizacao: string;
+  dataRegistro?: string; // YYYY-MM-DD
 }
 
 export interface DescasqueSector {
   condicaoCoco: DescasqueCondition;
   statusBalanca: ScaleStatus;
+  totalBalancaKg?: number; // Total da balança em Kg
+  totalCaixas?: number; // Total de caixas
   statusParada: StopStatus;
   motivoParada?: string;
   tempoParadaMinutos?: number;
   statusGeral: 'normal' | 'alerta' | 'parado';
   ultimaAtualizacao: string;
+  dataRegistro?: string;
 }
 
 export interface RaloSector {
@@ -57,6 +75,15 @@ export interface RaloSector {
   tempoParadaMinutos?: number;
   statusGeral: 'normal' | 'alerta' | 'parado';
   ultimaAtualizacao: string;
+  dataRegistro?: string;
+}
+
+export interface SectorStaff {
+  setor: 'Desfibramento' | 'Descasque' | 'Ralo';
+  presentes: number;
+  faltas: number;
+  ferias: number;
+  vagos: number;
 }
 
 export interface StaffData {
@@ -64,18 +91,14 @@ export interface StaffData {
   faltas: number;
   ferias: number;
   postosVagos: number;
-  setores?: {
-    setor: SectorType;
-    presentes: number;
-    faltas: number;
-    ferias: number;
-    vagos: number;
-  }[];
+  dataRegistro?: string;
+  setores?: SectorStaff[];
 }
 
 export interface OccurrenceItem {
   id: string;
   timestamp: string;
+  dataRegistro?: string; // YYYY-MM-DD
   hora: string;
   setor: SectorType;
   tipo: OccurrenceType;
@@ -95,7 +118,8 @@ export interface NewRecordFormData {
   // Desfibramento
   carretasEmProcesso?: number;
   carretasProcessadasDia?: number;
-  variedadeCoco?: CoconutVariety;
+  totalCocosProcessados?: number;
+  variedadeCoco?: string; // e.g. "PB-111, PB-121"
   estoqueInteiro?: number;
   estoqueFurado?: number;
   unidadeEstoque?: 'milheiros' | 'unidades' | 'toneladas';
@@ -103,6 +127,8 @@ export interface NewRecordFormData {
   // Descasque
   condicaoCoco?: DescasqueCondition;
   statusBalancaDescasque?: ScaleStatus;
+  totalBalancaKg?: number;
+  totalCaixas?: number;
   statusParadaDescasque?: StopStatus;
 
   // Ralo
@@ -110,11 +136,12 @@ export interface NewRecordFormData {
   statusBalancaRalo?: ScaleStatus;
   statusParadaRalo?: StopStatus;
 
-  // Quadro de Pessoal
+  // Quadro de Pessoal Consolidado
   trabalhando: number;
   faltas: number;
   ferias: number;
   postosVagos: number;
+  setoresStaff?: SectorStaff[];
 
   // Ocorrência
   temOcorrencia: boolean;

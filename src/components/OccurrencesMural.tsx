@@ -68,6 +68,12 @@ export const OccurrencesMural: React.FC<OccurrencesMuralProps> = ({
           color: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
           dot: 'bg-amber-400',
         };
+      case 'Falta de Insumo/coco':
+        return {
+          icon: AlertTriangle,
+          color: 'bg-orange-500/15 text-orange-300 border-orange-500/40',
+          dot: 'bg-orange-400',
+        };
       case 'Alerta de Qualidade':
         return {
           icon: AlertTriangle,
@@ -111,7 +117,7 @@ export const OccurrencesMural: React.FC<OccurrencesMuralProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Histórico cronológico de paradas, alertas técnicos e ocorrências operacionais
+              Apontamento cronológico de paradas e alertas técnicos do dia vigente
             </p>
           </div>
         </div>

@@ -45,6 +45,7 @@ import {
   subscribeOccurrences,
   saveRecordToFirestore,
   toggleOccurrenceInFirestore,
+  resetDailyDataToCleanState,
   resetAllFirestoreData
 } from './services/productionService';
 
@@ -65,7 +66,7 @@ export default function App() {
 
   // Initialize and subscribe to Firestore real-time listeners
   useEffect(() => {
-    // Initial schema bootstrap
+    // Initial schema bootstrap and day check
     initializeFirestoreDefaults();
 
     // 1. Listen to Desfibramento
@@ -168,12 +169,24 @@ export default function App() {
     }
   };
 
+  // Reset to clean daily state in Firestore
+  const handleResetDay = async () => {
+    if (window.confirm('Deseja zerar os contadores e iniciar um novo dia de produção limpo?')) {
+      try {
+        await resetDailyDataToCleanState();
+        showToast('Dia Reiniciado', 'Os contadores diários foram zerados com sucesso.', 'success');
+      } catch (error) {
+        console.error('Error resetting day:', error);
+      }
+    }
+  };
+
   // Reset to default sample state in Firestore
   const handleResetData = async () => {
-    if (window.confirm('Deseja restaurar os dados padrões de demonstração para todos os usuários?')) {
+    if (window.confirm('Deseja restaurar os dados de demonstração com ocorrências de exemplo?')) {
       try {
         await resetAllFirestoreData();
-        showToast('Dados Restaurados', 'Painel redefinido na nuvem para o padrão de produção.', 'info');
+        showToast('Dados Restaurados', 'Painel redefinido na nuvem para o padrão de demonstração.', 'info');
       } catch (error) {
         console.error('Error resetting data:', error);
       }
@@ -193,6 +206,7 @@ export default function App() {
         activeShift={activeShift}
         onChangeShift={setActiveShift}
         onResetData={handleResetData}
+        onResetDay={handleResetDay}
       />
 
       {/* 2. MAIN DASHBOARD CONTENT */}

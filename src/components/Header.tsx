@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Activity, Factory, Clock, Calendar, RefreshCw } from 'lucide-react';
+import { Plus, Activity, Factory, Clock, Calendar, RefreshCw, Trash2, RotateCcw } from 'lucide-react';
 import { ShiftType } from '../types';
 
 interface HeaderProps {
@@ -7,6 +7,7 @@ interface HeaderProps {
   activeShift: ShiftType;
   onChangeShift: (shift: ShiftType) => void;
   onResetData: () => void;
+  onResetDay: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -14,6 +15,7 @@ export const Header: React.FC<HeaderProps> = ({
   activeShift,
   onChangeShift,
   onResetData,
+  onResetDay,
 }) => {
   const [currentTime, setCurrentTime] = useState<string>('');
   const [formattedDate, setFormattedDate] = useState<string>('');
@@ -22,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
     const updateDateTime = () => {
       const now = new Date();
       
-      // Date in Portuguese: e.g. "Quinta-feira, 13 de Agosto de 2026"
+      // Date in Portuguese: e.g. "Sexta-feira, 14 de Agosto de 2026"
       const dateStr = now.toLocaleDateString('pt-BR', {
         weekday: 'long',
         day: '2-digit',
@@ -76,14 +78,17 @@ export const Header: React.FC<HeaderProps> = ({
               
               {/* Subtitle / Date */}
               <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-400 mt-0.5 flex-wrap">
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                  <span className="font-medium text-slate-300">{formattedDate || 'Carregando data...'}</span>
+                <span className="flex items-center gap-1.5 bg-slate-950/60 px-2 py-0.5 rounded border border-slate-800 text-slate-300">
+                  <Calendar className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="font-semibold text-white">{formattedDate || 'Carregando data...'}</span>
                 </span>
                 <span className="text-slate-600 hidden sm:inline">•</span>
                 <span className="flex items-center gap-1 font-mono-code text-slate-400 text-xs">
                   <Clock className="w-3.5 h-3.5 text-slate-500" />
                   <span>{currentTime || '00:00:00'}</span>
+                </span>
+                <span className="text-[11px] text-amber-400/90 font-medium hidden lg:inline">
+                  (Dados e ocorrências isolados por dia)
                 </span>
               </div>
             </div>
@@ -115,14 +120,15 @@ export const Header: React.FC<HeaderProps> = ({
               })}
             </div>
 
-            {/* Reset / Reload Action */}
+            {/* Zerar Dia Manualmente */}
             <button
-              id="btn-reset-data"
-              onClick={onResetData}
-              title="Restaurar dados padrões de demonstração"
-              className="p-2 rounded-lg bg-slate-800/70 border border-slate-700/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+              id="btn-zerar-dia"
+              onClick={onResetDay}
+              title="Zerar dados de produção e ocorrências do dia para iniciar novo dia limpo"
+              className="flex items-center gap-1 px-2.5 py-2 rounded-lg bg-slate-950 border border-amber-500/30 text-amber-400 hover:text-amber-300 hover:bg-amber-950/30 text-xs font-semibold transition-colors"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Zerar Dia</span>
             </button>
 
             {/* Primary Action: + Novo Registro */}

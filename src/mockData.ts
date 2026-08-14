@@ -1,23 +1,36 @@
 import { DesfibramentoSector, DescasqueSector, RaloSector, StaffData, OccurrenceItem } from './types';
 
+export const getTodayDateKey = (): string => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export const initialDesfibramento: DesfibramentoSector = {
-  carretasEmProcesso: 3,
-  carretasProcessadasDia: 14,
+  carretasEmProcesso: 23.5,
+  carretasProcessadasDia: 8.5,
   metaCarretasDia: 20,
-  variedadeCoco: 'Anão Verde',
+  totalCocosProcessados: 119000,
+  variedadeCoco: 'PB-111, PB-121',
   estoqueInteiro: 42500,
   estoqueFurado: 9800,
   unidadeEstoque: 'unidades',
   statusGeral: 'normal',
   ultimaAtualizacao: '13:20',
+  dataRegistro: getTodayDateKey(),
 };
 
 export const initialDescasque: DescasqueSector = {
   condicaoCoco: 'Padrão / Excelente',
   statusBalanca: 'Operacional',
+  totalBalancaKg: 14850,
+  totalCaixas: 580,
   statusParada: 'Normal (Em Operação)',
   statusGeral: 'normal',
   ultimaAtualizacao: '13:22',
+  dataRegistro: getTodayDateKey(),
 };
 
 export const initialRalo: RaloSector = {
@@ -26,18 +39,19 @@ export const initialRalo: RaloSector = {
   statusParada: 'Normal (Em Operação)',
   statusGeral: 'normal',
   ultimaAtualizacao: '13:25',
+  dataRegistro: getTodayDateKey(),
 };
 
 export const initialStaff: StaffData = {
-  trabalhando: 48,
+  trabalhando: 44,
   faltas: 3,
   ferias: 4,
   postosVagos: 2,
+  dataRegistro: getTodayDateKey(),
   setores: [
     { setor: 'Desfibramento', presentes: 14, faltas: 1, ferias: 1, vagos: 1 },
     { setor: 'Descasque', presentes: 20, faltas: 1, ferias: 2, vagos: 1 },
     { setor: 'Ralo', presentes: 10, faltas: 1, ferias: 1, vagos: 0 },
-    { setor: 'Outros', presentes: 4, faltas: 0, ferias: 0, vagos: 0 },
   ],
 };
 
@@ -45,6 +59,7 @@ export const initialOccurrences: OccurrenceItem[] = [
   {
     id: 'occ-101',
     timestamp: new Date().toISOString(),
+    dataRegistro: getTodayDateKey(),
     hora: '13:10',
     setor: 'Descasque',
     tipo: 'Parada Mecânica',
@@ -59,6 +74,7 @@ export const initialOccurrences: OccurrenceItem[] = [
   {
     id: 'occ-102',
     timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+    dataRegistro: getTodayDateKey(),
     hora: '12:25',
     setor: 'Ralo',
     tipo: 'Alerta de Qualidade',
@@ -72,26 +88,14 @@ export const initialOccurrences: OccurrenceItem[] = [
   {
     id: 'occ-103',
     timestamp: new Date(Date.now() - 110 * 60 * 1000).toISOString(),
+    dataRegistro: getTodayDateKey(),
     hora: '11:20',
     setor: 'Desfibramento',
     tipo: 'Registro de Rotina',
-    titulo: 'Recebimento de 4 carretas de Coco Verde',
-    descricao: 'Chegada da frota da Fazenda São Bento. Variedade Anão Verde com excelente rendimento de fibra e umidade controlada.',
+    titulo: 'Recebimento de 4 carretas de Coco PB-111 e AVeBr',
+    descricao: 'Chegada da frota com variedades PB-111 e AVeBr. Excelente rendimento de fibra e umidade controlada.',
     responsavel: 'Gilberto Ramos (Recebimento)',
     turno: 'Turno 1 (06:00 - 14:00)',
     status: 'Normalizado',
-  },
-  {
-    id: 'occ-104',
-    timestamp: new Date(Date.now() - 210 * 60 * 1000).toISOString(),
-    hora: '09:30',
-    setor: 'Ralo',
-    tipo: 'Status da Balança',
-    titulo: 'Aferição e Calibração da Balança 01',
-    descricao: 'Balança de pesagem contínua aferida com pesos-padrão de 50kg. Erro dentro da tolerância de ±0,02%.',
-    responsavel: 'Técnico Metrologia Souza',
-    turno: 'Turno 1 (06:00 - 14:00)',
-    status: 'Normalizado',
-    acaoCorretiva: 'Certificado de verificação diária emitido.',
   },
 ];

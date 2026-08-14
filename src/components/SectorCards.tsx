@@ -180,18 +180,22 @@ export const SectorCards: React.FC<SectorCardsProps> = ({
               <span className="text-xs font-medium text-slate-400">Carretas em Processo</span>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-2xl font-black text-white font-mono-code">
-                  {desfibramento.carretasEmProcesso}
+                  {typeof desfibramento.carretasEmProcesso === 'number' 
+                    ? desfibramento.carretasEmProcesso.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) 
+                    : desfibramento.carretasEmProcesso}
                 </span>
-                <span className="text-xs text-emerald-400 font-medium">ativas no pátio</span>
+                <span className="text-xs text-emerald-400 font-medium">no pátio</span>
               </div>
             </div>
 
             {/* Total Carretas Dia */}
             <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5 flex flex-col justify-between">
-              <span className="text-xs font-medium text-slate-400">Total Processadas no Dia</span>
+              <span className="text-xs font-medium text-slate-400">Processadas no Dia</span>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-2xl font-black text-emerald-400 font-mono-code">
-                  {desfibramento.carretasProcessadasDia}
+                  {typeof desfibramento.carretasProcessadasDia === 'number' 
+                    ? desfibramento.carretasProcessadasDia.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) 
+                    : desfibramento.carretasProcessadasDia}
                 </span>
                 <span className="text-xs text-slate-500 font-medium">/ {desfibramento.metaCarretasDia} meta</span>
               </div>
@@ -199,16 +203,40 @@ export const SectorCards: React.FC<SectorCardsProps> = ({
 
           </div>
 
+          {/* Total de Cocos Processados (Unidades) */}
+          <div className="mb-4 bg-slate-950/80 border border-emerald-500/30 rounded-xl p-3.5 flex items-center justify-between">
+            <div>
+              <span className="text-xs font-semibold text-emerald-300 flex items-center gap-1.5">
+                <Package className="w-3.5 h-3.5 text-emerald-400" />
+                Total de Cocos Processados
+              </span>
+              <span className="text-[11px] text-slate-400 block mt-0.5">Produção acumulada no dia</span>
+            </div>
+            <div className="text-right">
+              <span className="text-2xl font-black text-white font-mono-code">
+                {(desfibramento.totalCocosProcessados ?? 119000).toLocaleString('pt-BR')}
+              </span>
+              <span className="text-xs text-emerald-400 font-bold ml-1.5">un</span>
+            </div>
+          </div>
+
           {/* Variedade do Coco */}
           <div className="mb-4 bg-slate-950/40 border border-slate-800/60 rounded-xl p-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
               <span className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-slate-500" />
                 Variedade do Coco:
               </span>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                {desfibramento.variedadeCoco || 'Não informada'}
-              </span>
+              <div className="flex flex-wrap items-center gap-1">
+                {(desfibramento.variedadeCoco || 'PB-111').split(',').map((v) => (
+                  <span 
+                    key={v.trim()} 
+                    className="text-xs font-mono-code font-bold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                  >
+                    {v.trim()}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -298,15 +326,56 @@ export const SectorCards: React.FC<SectorCardsProps> = ({
             </button>
           </div>
 
+          {/* Registros da Balança (Total em Kg & Total de Caixas) */}
+          <div className="grid grid-cols-2 gap-3 my-4">
+            {/* Total em Kg */}
+            <div className="bg-slate-950/80 border border-blue-500/30 rounded-xl p-3.5 flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-blue-300 flex items-center gap-1.5">
+                  <Scale className="w-3.5 h-3.5 text-blue-400" />
+                  Total da Balança
+                </span>
+                <span className="text-[10px] uppercase font-mono-code font-bold px-1.5 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-500/20">
+                  Kg
+                </span>
+              </div>
+              <div className="mt-2 flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-white font-mono-code">
+                  {(descasque.totalBalancaKg ?? 14850).toLocaleString('pt-BR')}
+                </span>
+                <span className="text-xs text-blue-400 font-semibold">kg</span>
+              </div>
+            </div>
+
+            {/* Total de Caixas */}
+            <div className="bg-slate-950/80 border border-blue-500/30 rounded-xl p-3.5 flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-blue-300 flex items-center gap-1.5">
+                  <Package className="w-3.5 h-3.5 text-blue-400" />
+                  Total de Caixas
+                </span>
+                <span className="text-[10px] uppercase font-mono-code font-bold px-1.5 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-500/20">
+                  cx
+                </span>
+              </div>
+              <div className="mt-2 flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-blue-300 font-mono-code">
+                  {(descasque.totalCaixas ?? 580).toLocaleString('pt-BR')}
+                </span>
+                <span className="text-xs text-slate-400 font-medium">caixas</span>
+              </div>
+            </div>
+          </div>
+
           {/* Condição do Coco */}
-          <div className="my-4 bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5">
+          <div className="mb-4 bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5">
             <span className="text-xs font-medium text-slate-400 block mb-1.5">Condição do Coco</span>
             <div className="flex items-center justify-between">
               <span className="text-base font-bold text-white tracking-tight">
                 {descasque.condicaoCoco}
               </span>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 font-medium">
-                Linha 01 e 02
+                Linha 01 à 04
               </span>
             </div>
           </div>
@@ -324,7 +393,7 @@ export const SectorCards: React.FC<SectorCardsProps> = ({
               </span>
             </div>
             <p className="text-[11px] text-slate-500 mt-1">
-              Pesagem contínua de massa líquida de amêndoa.
+              Pesagem contínua de amêndoa.
             </p>
           </div>
 
@@ -377,7 +446,7 @@ export const SectorCards: React.FC<SectorCardsProps> = ({
               </div>
               <div>
                 <span className="text-[10px] font-bold tracking-wider uppercase text-amber-400 font-mono-code">Setor 03</span>
-                <h2 className="text-lg font-bold text-white tracking-tight font-display">Ralo / Moagem</h2>
+                <h2 className="text-lg font-bold text-white tracking-tight font-display">Ralo</h2>
               </div>
             </div>
             <button
@@ -438,7 +507,7 @@ export const SectorCards: React.FC<SectorCardsProps> = ({
               </span>
             </div>
             <p className="text-[11px] text-slate-500 mt-1">
-              Balança dosadora para secagem e processamento.
+              Transportador aéreo de corrente.
             </p>
           </div>
 
@@ -472,7 +541,7 @@ export const SectorCards: React.FC<SectorCardsProps> = ({
 
         {/* Footer info */}
         <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
-          <span>Trituração & Moagem</span>
+          <span>Despeliculamento de améndoa</span>
           <span className="font-mono-code">Atualizado às {ralo.ultimaAtualizacao || '13:00'}</span>
         </div>
       </div>

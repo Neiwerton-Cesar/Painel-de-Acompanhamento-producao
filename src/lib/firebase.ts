@@ -1,6 +1,9 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { 
-  getFirestore, 
+  initializeFirestore,
+  getFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   collection, 
   doc, 
   setDoc, 
@@ -27,10 +30,31 @@ const firebaseConfig = {
 // Initialize Firebase App
 export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Firestore with specific database ID if configured
-export const db = firebaseConfigJson.firestoreDatabaseId && firebaseConfigJson.firestoreDatabaseId !== '(default)'
-  ? getFirestore(app, firebaseConfigJson.firestoreDatabaseId)
-  : getFirestore(app);
+const databaseId = firebaseConfigJson.firestoreDatabaseId && firebaseConfigJson.firestoreDatabaseId !== '(default)'
+  ? firebaseConfigJson.firestoreDatabaseId
+  : undefined;
+
+function createFirestoreInstance() {
+  try {
+    return initializeFirestore(app, {
+      experimentalAutoDetectLongPolling: true,
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+      })
+    }, databaseId);
+  } catch {
+    try {
+      return initializeFirestore(app, {
+        experimentalAutoDetectLongPolling: true
+      }, databaseId);
+    } catch {
+      return databaseId ? getFirestore(app, databaseId) : getFirestore(app);
+    }
+  }
+}
+
+// Initialize Firestore with auto-detect long polling and multi-tab sync
+export const db = createFirestoreInstance();
 
 export {
   collection,
