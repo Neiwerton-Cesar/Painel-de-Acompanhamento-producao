@@ -1,0 +1,56 @@
+{
+  "entities": {
+    "sectors": {
+      "title": "Setores de Produção",
+      "description": "Estado em tempo real dos setores de Desfibramento, Descasque e Ralo",
+      "type": "object",
+      "properties": {
+        "carretasEmProcesso": { "type": "number" },
+        "carretasProcessadasDia": { "type": "number" },
+        "metaCarretasDia": { "type": "number" },
+        "variedadeCoco": { "type": "string" },
+        "estoqueInteiro": { "type": "number" },
+        "estoqueFurado": { "type": "number" },
+        "condicaoCoco": { "type": "string" },
+        "qualidadeCoco": { "type": "string" },
+        "statusBalanca": { "type": "string" },
+        "statusParada": { "type": "string" },
+        "motivoParada": { "type": "string" },
+        "tempoParadaMinutos": { "type": "number" },
+        "ultimaAtualizacao": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "staff": {
+      "title": "Quadro de Pessoal",
+      "description": "Efetivo atual, faltas, férias e postos vagos",
+      "type": "object",
+      "properties": {
+        "trabalhando": { "type": "number" },
+        "faltas": { "type": "number" },
+        "ferias": { "type": "number" },
+        "postosVagos": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "occurrences": {
+      "title": "Mural de Ocorrências",
+      "description": "Histórico cronológico de paradas, alertas e apontamentos",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "hora": { "type": "string" },
+        "setor": { "type": "string" },
+        "tipo": { "type": "string" },
+        "titulo": { "type": "string" },
+        "descricao": { "type": "string" },
+        "responsavel": { "type": "string" },
+        "turno": { "type": "string" },
+        "status": { "type": "string" },
+        "duracaoMinutos": { "type": "number" },
+        "acaoCorretiva": { "type": "string" }
+      }
+    }
+  }
+}

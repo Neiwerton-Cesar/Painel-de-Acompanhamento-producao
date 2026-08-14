@@ -1,0 +1,6 @@
+{
+  "name": "Gestão de Produção Industrial",
+  "description": "Painel de Acompanhamento de Produção em tempo real com controle de setores (Desfibramento, Descasque, Ralo), quadro de pessoal e mural de ocorrências.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
