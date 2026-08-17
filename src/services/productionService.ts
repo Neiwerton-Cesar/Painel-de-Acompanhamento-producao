@@ -100,22 +100,14 @@ export function getCleanDayStaff(): StaffData {
 }
 
 /**
- * Check if the stored Firestore data is from a previous day; if so, auto-reset for the new day
+ * Initialize default collections and documents if they do not exist in Firestore yet.
+ * NEVER resets or overwrites existing data automatically.
  */
 export async function initializeFirestoreDefaults(): Promise<void> {
   try {
-    const today = getTodayDateKey();
     const desfibSnap = await getDoc(DESFIBRAMENTO_DOC);
-    
     if (!desfibSnap.exists()) {
       await setDoc(DESFIBRAMENTO_DOC, initialDesfibramento);
-    } else {
-      const data = desfibSnap.data() as DesfibramentoSector;
-      // If data is from previous day, zero out counters for the new day
-      if (data.dataRegistro && data.dataRegistro !== today) {
-        await resetDailyDataToCleanState();
-        return;
-      }
     }
 
     const descasqueSnap = await getDoc(DESCASQUE_DOC);
@@ -133,12 +125,16 @@ export async function initializeFirestoreDefaults(): Promise<void> {
       await setDoc(STAFF_DOC, initialStaff);
     }
 
-    // Check if initial sample occurrences exist
+    // Check if initial sample occurrences exist only if collection is empty
     const occDocSample = doc(db, 'occurrences', initialOccurrences[0].id);
     const occSnap = await getDoc(occDocSample);
     if (!occSnap.exists()) {
-      for (const occ of initialOccurrences) {
-        await setDoc(doc(db, 'occurrences', occ.id), occ);
+      // Check if any occurrence exists before adding samples
+      const occQuerySnap = await getDocs(query(OCCURRENCES_COLLECTION, limit(1)));
+      if (occQuerySnap.empty) {
+        for (const occ of initialOccurrences) {
+          await setDoc(doc(db, 'occurrences', occ.id), occ);
+        }
       }
     }
   } catch (error) {
@@ -150,23 +146,13 @@ export async function initializeFirestoreDefaults(): Promise<void> {
  * Subscribe to Desfibramento Sector updates in real-time
  */
 export function subscribeDesfibramento(callback: (data: DesfibramentoSector) => void) {
-  const today = getTodayDateKey();
-
   return onSnapshot(
     DESFIBRAMENTO_DOC,
     (snap) => {
       if (snap.exists()) {
-        const data = snap.data() as DesfibramentoSector;
-        // Auto-detect day shift
-        if (data.dataRegistro && data.dataRegistro !== today) {
-          const clean = getCleanDayDesfibramento();
-          setDoc(DESFIBRAMENTO_DOC, clean).catch(console.error);
-          callback(clean);
-        } else {
-          callback(data);
-        }
+        callback(snap.data() as DesfibramentoSector);
       } else {
-        const initial = getCleanDayDesfibramento();
+        const initial = initialDesfibramento;
         setDoc(DESFIBRAMENTO_DOC, initial).catch(console.error);
         callback(initial);
       }
@@ -181,22 +167,13 @@ export function subscribeDesfibramento(callback: (data: DesfibramentoSector) => 
  * Subscribe to Descasque Sector updates in real-time
  */
 export function subscribeDescasque(callback: (data: DescasqueSector) => void) {
-  const today = getTodayDateKey();
-
   return onSnapshot(
     DESCASQUE_DOC,
     (snap) => {
       if (snap.exists()) {
-        const data = snap.data() as DescasqueSector;
-        if (data.dataRegistro && data.dataRegistro !== today) {
-          const clean = getCleanDayDescasque();
-          setDoc(DESCASQUE_DOC, clean).catch(console.error);
-          callback(clean);
-        } else {
-          callback(data);
-        }
+        callback(snap.data() as DescasqueSector);
       } else {
-        const initial = getCleanDayDescasque();
+        const initial = initialDescasque;
         setDoc(DESCASQUE_DOC, initial).catch(console.error);
         callback(initial);
       }
@@ -211,22 +188,13 @@ export function subscribeDescasque(callback: (data: DescasqueSector) => void) {
  * Subscribe to Ralo Sector updates in real-time
  */
 export function subscribeRalo(callback: (data: RaloSector) => void) {
-  const today = getTodayDateKey();
-
   return onSnapshot(
     RALO_DOC,
     (snap) => {
       if (snap.exists()) {
-        const data = snap.data() as RaloSector;
-        if (data.dataRegistro && data.dataRegistro !== today) {
-          const clean = getCleanDayRalo();
-          setDoc(RALO_DOC, clean).catch(console.error);
-          callback(clean);
-        } else {
-          callback(data);
-        }
+        callback(snap.data() as RaloSector);
       } else {
-        const initial = getCleanDayRalo();
+        const initial = initialRalo;
         setDoc(RALO_DOC, initial).catch(console.error);
         callback(initial);
       }
@@ -241,22 +209,13 @@ export function subscribeRalo(callback: (data: RaloSector) => void) {
  * Subscribe to Staff updates in real-time
  */
 export function subscribeStaff(callback: (data: StaffData) => void) {
-  const today = getTodayDateKey();
-
   return onSnapshot(
     STAFF_DOC,
     (snap) => {
       if (snap.exists()) {
-        const data = snap.data() as StaffData;
-        if (data.dataRegistro && data.dataRegistro !== today) {
-          const clean = getCleanDayStaff();
-          setDoc(STAFF_DOC, clean).catch(console.error);
-          callback(clean);
-        } else {
-          callback(data);
-        }
+        callback(snap.data() as StaffData);
       } else {
-        const initial = getCleanDayStaff();
+        const initial = initialStaff;
         setDoc(STAFF_DOC, initial).catch(console.error);
         callback(initial);
       }
@@ -268,10 +227,9 @@ export function subscribeStaff(callback: (data: StaffData) => void) {
 }
 
 /**
- * Subscribe to Occurrences Mural for the current day in real-time
+ * Subscribe to Occurrences Mural in real-time
  */
 export function subscribeOccurrences(callback: (data: OccurrenceItem[]) => void) {
-  const today = getTodayDateKey();
   const q = query(OCCURRENCES_COLLECTION, orderBy('timestamp', 'desc'), limit(100));
   
   return onSnapshot(
@@ -279,12 +237,7 @@ export function subscribeOccurrences(callback: (data: OccurrenceItem[]) => void)
     (snapshot) => {
       const list: OccurrenceItem[] = [];
       snapshot.forEach((docSnap) => {
-        const item = docSnap.data() as OccurrenceItem;
-        // Filter occurrences to only show records from today
-        const itemDate = item.dataRegistro || (item.timestamp ? item.timestamp.split('T')[0] : today);
-        if (itemDate === today) {
-          list.push(item);
-        }
+        list.push(docSnap.data() as OccurrenceItem);
       });
       callback(list);
     },
